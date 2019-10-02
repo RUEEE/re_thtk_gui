@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29102.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "thtkGUI_CS", "thtkGUI_CS\thtkGUI_CS.csproj", "{6976C7FA-11D3-4365-8DC7-F1F7E5BD5B11}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6976C7FA-11D3-4365-8DC7-F1F7E5BD5B11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6976C7FA-11D3-4365-8DC7-F1F7E5BD5B11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6976C7FA-11D3-4365-8DC7-F1F7E5BD5B11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6976C7FA-11D3-4365-8DC7-F1F7E5BD5B11}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A44F21D8-E500-48B5-99DA-A9B70296932A}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,13 @@
+F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\bin\Release\thtkGUI_CS.exe.config
+F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\bin\Release\thtkGUI_CS.exe
+F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\bin\Release\thtkGUI_CS.pdb
+F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Release\thtkGUI_CS.csprojAssemblyReference.cache
+F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Release\thtkGUI_CS.AboutBox.resources
+F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Release\thtkGUI_CS.ANM_Entry_choose.resources
+F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Release\thtkGUI_CS.Form_main.resources
+F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Release\thtkGUI_CS.Properties.Resources.resources
+F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Release\thtkGUI_CS.csproj.GenerateResource.cache
+F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Release\thtkGUI_CS.csproj.CoreCompileInputs.cache
+F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Release\thtkGUI_CS.exe
+F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Release\thtkGUI_CS.pdb
+F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Release\thtkGUI_CS.Help.resources
