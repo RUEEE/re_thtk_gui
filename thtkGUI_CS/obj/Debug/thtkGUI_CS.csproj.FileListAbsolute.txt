@@ -11,3 +11,16 @@ F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.pdb
 F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.ANM_Entry_choose.resources
 F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.AboutBox.resources
 F:\TOUHOU\TH\mods\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.Help.resources
+E:\touhou\TH\_TOOLS_SELF_MAKE\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\bin\Debug\thtkGUI_CS.exe.config
+E:\touhou\TH\_TOOLS_SELF_MAKE\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\bin\Debug\thtkGUI_CS.exe
+E:\touhou\TH\_TOOLS_SELF_MAKE\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\bin\Debug\thtkGUI_CS.pdb
+E:\touhou\TH\_TOOLS_SELF_MAKE\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.csprojAssemblyReference.cache
+E:\touhou\TH\_TOOLS_SELF_MAKE\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.AboutBox.resources
+E:\touhou\TH\_TOOLS_SELF_MAKE\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.ANM_Entry_choose.resources
+E:\touhou\TH\_TOOLS_SELF_MAKE\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.Form_main.resources
+E:\touhou\TH\_TOOLS_SELF_MAKE\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.Help.resources
+E:\touhou\TH\_TOOLS_SELF_MAKE\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.Properties.Resources.resources
+E:\touhou\TH\_TOOLS_SELF_MAKE\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.csproj.GenerateResource.cache
+E:\touhou\TH\_TOOLS_SELF_MAKE\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.csproj.CoreCompileInputs.cache
+E:\touhou\TH\_TOOLS_SELF_MAKE\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.exe
+E:\touhou\TH\_TOOLS_SELF_MAKE\thtkGUI_CS\thtkGUI_CS\thtkGUI_CS\obj\Debug\thtkGUI_CS.pdb
