@@ -383,6 +383,7 @@ namespace thtkGUI_CS
             SettingsToolStripMenuItem.Text = language.GetValue("menu", "Settings", "Settings");
             HelpToolStripMenuItem.Text = language.GetValue("menu", "Help", "Help");
             LanguageToolStripMenuItem.Text = language.GetValue("menu", "Language", "Language");
+            ignoreErrorToolStripMenuItem.Text=language.GetValue("menu", "Ignore_Error", "Ignore Error");
             AboutToolStripMenuItem.Text = language.GetValue("menu", "About", "About");
             HelpToolStripMenuItem1.Text = language.GetValue("menu", "Help1", "Help");
             MapToolStripMenuItem.Text = language.GetValue("menu", "Maps", "Maps");
@@ -430,6 +431,7 @@ namespace thtkGUI_CS
             btn_thstd_pack.Text = language.GetValue("thstd", "pack", "pack");
             btn_thstd_unpack.Text = language.GetValue("thstd", "unpack", "unpack");
             //error
+            Lay_Form();
         }
         private void Language_ChooseBox_Click(object sender, EventArgs e)
         {
@@ -568,47 +570,71 @@ namespace thtkGUI_CS
         }
         private void Lay_Form()
         {
+            int max_lb_width=0;
+            Label[] lbs = { lbl_folder, lbl_archive, lbl_dat_list,lbl_des,lbl_folder2,lbl_archive2,lbl_des,lbl_file,lbl_archive3,lbl_file2,lbl_archive4,lbl_file3,lbl_archive5 };
+            foreach(var lb in lbs) { max_lb_width=Math.Max(max_lb_width, lb.Width); }
+
             int wd = Width;
             int folder_X = wd - 40;
             int button_file_X = wd - 70;
-            int txt_X = wd - 180;
+            int txt_width = wd - max_lb_width - 90;
+            int txt_X = max_lb_width+15;
             //dat
             Folder_thdat.Width = folder_X;
             btn_thdat_folder_file.Left = button_file_X;
             btn_thdat_archive_file.Left = button_file_X;
-            txt_thdat_folder.Width = txt_X;
-            txt_thdat_archive.Width = txt_X;
             btn_thdat_list_file.Left = button_file_X;
-            txt_thdat_list.Width = txt_X;
+            txt_thdat_folder.Width = txt_width;
+            txt_thdat_archive.Width = txt_width;
+            txt_thdat_list.Width = txt_width;
+
+            txt_thdat_folder.Left = txt_X;
+            txt_thdat_archive.Left = txt_X;
+            txt_thdat_list.Left = txt_X;
             //anm
             Folder_thanm.Width = folder_X;
             btn_thanm_folder_file.Left = button_file_X;
             btn_thanm_archive_file.Left = button_file_X;
             btn_thanm_des_file.Left = button_file_X;
             btn_thanm_entry_file_file.Left = button_file_X;
-            txt_thanm_folder.Width = txt_X;
-            txt_thanm_archive.Width = txt_X;
-            txt_thanm_des.Width = txt_X;
-            cmb_entry.Width = txt_X;
-            txt_thanm_entry_file.Width = txt_X;
+            txt_thanm_folder.Width = txt_width;
+            txt_thanm_archive.Width = txt_width;
+            txt_thanm_des.Width = txt_width;
+            cmb_entry.Width = txt_width;
+            txt_thanm_entry_file.Width = txt_width;
+
+            txt_thanm_folder.Left = txt_X;
+            txt_thanm_archive.Left = txt_X;
+            txt_thanm_des.Left = txt_X;
+            cmb_entry.Left = txt_X;
+            txt_thanm_entry_file.Left = txt_X;
             //ecl
             Folder_thecl.Width = folder_X;
             btn_thecl_file_file.Left = button_file_X;
             btn_thecl_archive_file.Left = button_file_X;
-            txt_thecl_file.Width = txt_X;
-            txt_thecl_archive.Width = txt_X;
+            txt_thecl_file.Width = txt_width;
+            txt_thecl_archive.Width = txt_width;
+
+            txt_thecl_file.Left = txt_X;
+            txt_thecl_archive.Left = txt_X;
             //msg
             Folder_thmsg.Width = folder_X;
             btn_thmsg_file_file.Left = button_file_X;
             btn_thmsg_archive_file.Left = button_file_X;
-            txt_thmsg_file.Width = txt_X;
-            txt_thmsg_archive.Width = txt_X;
+            txt_thmsg_file.Width = txt_width;
+            txt_thmsg_archive.Width = txt_width;
+
+            txt_thmsg_file.Left = txt_X;
+            txt_thmsg_archive.Left = txt_X;
             //std
             Folder_thstd.Width = folder_X;
             btn_thstd_file_file.Left = button_file_X;
             btn_thstd_archive_file.Left = button_file_X;
-            txt_thstd_file.Width = txt_X;
-            txt_thstd_archive.Width = txt_X;
+            txt_thstd_file.Width = txt_width;
+            txt_thstd_archive.Width = txt_width;
+
+            txt_thstd_file.Left = txt_X;
+            txt_thstd_archive.Left = txt_X;
         }
         private void Form_main_Resize(object sender, EventArgs e)
         {
