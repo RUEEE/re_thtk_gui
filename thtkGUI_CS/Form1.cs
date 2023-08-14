@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using System.IO;
+using System.Runtime.Remoting.Messaging;
 
 namespace thtkGUI_CS
 {
@@ -29,6 +30,7 @@ namespace thtkGUI_CS
         private bool is_use_ANMMAP = false;
         private bool is_use_STDMAP = false;
         private bool is_use_MSGMAP = false;
+        private bool ignore_error = false;
         private string ecl_suffix = null;
         private string anm_suffix = null;
         private string std_suffix = null;
@@ -40,12 +42,44 @@ namespace thtkGUI_CS
         private string now_game = null;//如 TH06东方红魔乡
         private string now_game_enter = null;//如15,165
         string language_selected = null;
+
+        private StreamWriter log_stream = null;
         public Form_main()
         {
             InitializeComponent();
         }
+        public void LogError(string str,bool is_fatal)
+        {
+            log_stream.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] [ERROR] {str}");
+            log_stream.Flush();
+            if (!ignore_error || is_fatal)
+            {
+                MessageBox.Show(str, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        public void LogInfo(string str)
+        {
+            log_stream.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] [INFO]  {str}");
+            log_stream.Flush();
+        }
+        public void LogTHTKOutput(string str)
+        {
+
+            log_stream.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] [THTK/INFO] {str}");
+            log_stream.Flush();
+            if (!ignore_error)
+            {
+                MessageBox.Show(str, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
         private void Form_main_Load(object sender, EventArgs e)
         {
+            var log_path = "log/"+DateTime.Now.ToString("yyyy-MM-dd")+".log";
+            if (!Directory.Exists("log/"))
+            {
+                Directory.CreateDirectory("log");
+            }
+            log_stream=new StreamWriter(log_path,true);
             ConfigFile config = new ConfigFile("config/all_game.ini");
             try
             {
@@ -53,7 +87,7 @@ namespace thtkGUI_CS
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message,true);
                 is_Errror = 1;
                 this.Close();
                 return;
@@ -73,7 +107,7 @@ namespace thtkGUI_CS
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 is_Errror = 1;
                 this.Close();
                 return;
@@ -81,7 +115,7 @@ namespace thtkGUI_CS
             games = config_game.GetKeys("game");
             if (games == null)
             {
-                MessageBox.Show("未检测到config/games.ini中的[game]节,请重试", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError("cannot find 'game' section in config/games.ini", true);
                 is_Errror = 1;
                 this.Close();
                 return;
@@ -122,7 +156,7 @@ namespace thtkGUI_CS
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 is_Errror = 1;
                 this.Close();
                 return;
@@ -130,7 +164,7 @@ namespace thtkGUI_CS
             ver_thtk = config_main.GetValue("main", "thtk_version", "-1");
             if (ver_thtk == "-1")
             {
-                MessageBox.Show("unknown thtk ver", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError("unknown thtk ver", true);
                 is_Errror = 1;
                 this.Close();
                 return;
@@ -194,10 +228,20 @@ namespace thtkGUI_CS
                 {
                     MSGMAPToolStripMenuItem.Checked = false; is_use_MSGMAP = false;
                 }
+
+                buf = config_main.GetValue("main", "enable_ignore_error", "false");
+                if (Convert.ToBoolean(buf))
+                {
+                    ignoreErrorToolStripMenuItem.Checked = true; ignore_error = true;
+                }
+                else
+                {
+                    ignoreErrorToolStripMenuItem.Checked = false; ignore_error = false;
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("加载设置错误," + ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError("fail to load settings: "+ex.Message, true);
                 is_Errror = 1;
                 this.Close();
                 return;
@@ -211,7 +255,7 @@ namespace thtkGUI_CS
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 is_Errror = 1;
                 this.Close();
                 return;
@@ -219,7 +263,7 @@ namespace thtkGUI_CS
             langs = config_language.GetKeys("language");
             if (langs == null)
             {
-                MessageBox.Show("未检测到config/language/all_language.ini中的[language]节,请重试", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError("cannot find 'language' section in config/language/all_language.ini", true);
                 is_Errror = 1;
                 this.Close();
                 return;
@@ -235,7 +279,6 @@ namespace thtkGUI_CS
                 LanguageToolStripMenuItem.DropDownItems.Add(l);
             }
             Change_language(now_language);
-            //修改语言完毕
         }
         private void Init_FormPos()
         {
@@ -257,7 +300,7 @@ namespace thtkGUI_CS
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LogError(ex.Message, true);
                     is_Errror = 1;
                     this.Close();
                     return;
@@ -308,7 +351,7 @@ namespace thtkGUI_CS
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LogError(ex.Message, true);
                     is_Errror = 1;
                     this.Close();
                     return;
@@ -323,7 +366,7 @@ namespace thtkGUI_CS
             language_selected = lang_selected;
             if (!langs.ContainsKey(lang_selected))
             {
-                MessageBox.Show("找不到对应语言", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError("cannot find corresponding language",false);
                 return;
             }
             lang_file = langs[lang_selected];
@@ -333,8 +376,7 @@ namespace thtkGUI_CS
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                MessageBox.Show("修改语言失败", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError("fail to change language : "+ ex.Message, false);
                 return;
             }
             GameToolStripMenuItem.Text = language.GetValue("menu", "Game", "Game");
@@ -411,7 +453,7 @@ namespace thtkGUI_CS
                 }
                 if (nwGame == "-1")
                 {
-                    MessageBox.Show("未找到游戏", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LogError("cannot find the game", true);
                     is_Errror = 1;
                     this.Close();
                     return;
@@ -435,13 +477,13 @@ namespace thtkGUI_CS
                 now_game_enter = config_game.GetValue("game", nwGame, "-1");
                 if (now_game_enter == "-1")
                 {
-                    MessageBox.Show("不明游戏版本,请确认config", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LogError("unknown game version", false);
                     return;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -497,7 +539,6 @@ namespace thtkGUI_CS
             {
                 try
                 {
-                    //修改参数
                     if (form_background != null)
                     {
                         Height = Width * form_background.Height / form_background.Width;
@@ -520,9 +561,10 @@ namespace thtkGUI_CS
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("保存失败," + ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LogError("fail to save : "+ex.Message, false);
                 }
             }
+            log_stream.Close();
         }
         private void Lay_Form()
         {
@@ -600,10 +642,20 @@ namespace thtkGUI_CS
         private void Btn_thecl_file_file_Click(object sender, EventArgs e)
         {
             OpenFileDialog file = new OpenFileDialog { Filter = ecl_suffix_file };
+            file.Multiselect=true;
             file.ShowDialog();
-            if (file.FileName == "")
+            if (file.FileNames.Length==0)
                 return;
-            txt_thecl_file.Text = file.FileName;
+            else if(file.FileNames.Length==1)
+            {
+                txt_thecl_file.Text = file.FileNames.First();
+            }else{
+                txt_thecl_file.Text = "";
+                foreach (var s in file.FileNames)
+                {
+                    txt_thecl_file.Text +="\""+s+"\" ";
+                }
+            }
         }
         private void Btn_thecl_archive_file_Click(object sender, EventArgs e)
         {
@@ -616,54 +668,78 @@ namespace thtkGUI_CS
                         file.InitialDirectory = System.IO.Path.GetDirectoryName(path);
                 if (Directory.Exists(path))
                     file.InitialDirectory = path;
+                file.Multiselect=true;
                 file.ShowDialog();
-                if (file.FileName == "")
+                if (file.FileNames.Length==0)
                     return;
-                txt_thecl_archive.Text = file.FileName;
-                txt_thecl_file.Text =
-             System.IO.Path.GetDirectoryName(file.FileName) + @"\ECL\" +
-             System.IO.Path.GetFileNameWithoutExtension(file.FileName) + ecl_suffix;
+                else if(file.FileNames.Length==1)   
+                {
+                    txt_thecl_archive.Text = file.FileNames.First();
+                    txt_thecl_file.Text =
+                    System.IO.Path.GetDirectoryName(file.FileNames.First()) + @"\ECL\" +
+                    System.IO.Path.GetFileNameWithoutExtension(file.FileNames.First()) + ecl_suffix;
+                }else{
+                    txt_thecl_archive.Text = "";
+                    txt_thecl_file.Text ="";
+                    foreach (string s in file.FileNames)
+                    {
+                        txt_thecl_archive.Text += "\"" + s+"\" ";
+                        txt_thecl_file.Text += 
+                            "\""+System.IO.Path.GetDirectoryName(s) + @"\ECL\" + System.IO.Path.GetFileNameWithoutExtension(s) + ecl_suffix+"\" ";
+                    }
+                }
+                
             }
             catch { }
-
         }
         private void Btn_thecl_unpack_Click(object sender, EventArgs e)
         {
             try
             {
-                if (!Directory.Exists(System.IO.Path.GetDirectoryName(txt_thecl_file.Text)))//若文件夹不存在则新建文件夹   
+                var archives = txt_thecl_archive.Text.Trim().Split(' ');
+                var aims = txt_thecl_file.Text.Trim().Split(' ');
+                if(aims.Length!=archives.Length)
                 {
-                    Directory.CreateDirectory(System.IO.Path.GetDirectoryName(txt_thecl_file.Text)); //新建文件夹   
+                    throw new System.ArgumentException("number of ECL files not equal to number of dumped files");
                 }
-                FileStream fs = new FileStream(txt_thecl_file.Text, FileMode.Create);
-                fs.Close();
-                Dictionary<string, string> args = new Dictionary<string, string>();
-                args.Add("gameVer", now_game_enter);
-                args.Add("aim", txt_thecl_file.Text);
-                args.Add("source", txt_thecl_archive.Text);
-                args.Add("this", System.IO.Directory.GetCurrentDirectory());
-                string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thecl_workDir", "this"), args);
-                string cmd_uncsted = null;
-                if (is_use_ECLMAP)
+                for(int i=0; i<archives.Length; i++)
                 {
-                    args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\ECL_MAP_" + now_game_enter + ".txt");
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thecl_unpack_map", "-1");
+                    var archive_path = archives[i].Trim('\"');
+                    var aim_path = aims[i].Trim('\"');
+                    if (!Directory.Exists(System.IO.Path.GetDirectoryName(aim_path)))
+                    {
+                        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(aim_path));
+                    }
+                    FileStream fs = new FileStream(aim_path, FileMode.Create);
+                    fs.Close();
+                    Dictionary<string, string> args = new Dictionary<string, string>();
+                    args.Add("gameVer", now_game_enter);
+                    args.Add("aim", aim_path);
+                    args.Add("source", archive_path);
+                    args.Add("this", System.IO.Directory.GetCurrentDirectory());
+                    string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thecl_workDir", "this"), args);
+                    string cmd_uncsted = null;
+                    if (is_use_ECLMAP)
+                    {
+                        args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\th" + now_game_enter + ".eclm");
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thecl_unpack_map", "-1");
+                    }
+                    else
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thecl_unpack", "-1");
+                    if (cmd_uncsted == "-1")
+                    {
+                        LogError("unknown command", true);
+                        return;
+                    }
+                    string cmd = THTK_Commander.CastCommand(
+                    cmd_uncsted, args);
+                    THTK_Commander.DoCommand(
+                        System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thecl.exe", cmd, workDir,LogTHTKOutput);
                 }
-                else
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thecl_unpack", "-1");
-                if (cmd_uncsted == "-1")
-                {
-                    MessageBox.Show("unknown command", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                string cmd = THTK_Commander.CastCommand(
-                cmd_uncsted, args);
-                THTK_Commander.DoCommand(
-                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thecl.exe", cmd, workDir);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -671,33 +747,44 @@ namespace thtkGUI_CS
         {
             try
             {
-                Dictionary<string, string> args = new Dictionary<string, string>();
-                args.Add("gameVer", now_game_enter);
-                args.Add("aim", txt_thecl_archive.Text);
-                args.Add("source", txt_thecl_file.Text);
-                args.Add("this", System.IO.Directory.GetCurrentDirectory());
-                string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thecl_workDir", "this"), args);
-                string cmd_uncsted = null;
-                if (is_use_ECLMAP)
+                var archives = txt_thecl_archive.Text.Trim().Split(' ');
+                var aims = txt_thecl_file.Text.Trim().Split(' ');
+                if (aims.Length!=archives.Length)
                 {
-                    args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\ECL_MAP_" + now_game_enter + ".txt");
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thecl_pack_map", "-1");
+                    throw new System.ArgumentException("number of ECL files not equal to number of dumped files");
                 }
-                else
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thecl_pack", "-1");
-                if (cmd_uncsted == "-1")
+                for (int i = 0; i<archives.Length; i++)
                 {
-                    MessageBox.Show("unknown command", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    var archive_path = archives[i].Trim('\"');
+                    var aim_path = aims[i].Trim('\"');
+                    Dictionary<string, string> args = new Dictionary<string, string>();
+                    args.Add("gameVer", now_game_enter);
+                    args.Add("aim", archive_path);
+                    args.Add("source", aim_path);
+                    args.Add("this", System.IO.Directory.GetCurrentDirectory());
+                    string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thecl_workDir", "this"), args);
+                    string cmd_uncsted = null;
+                    if (is_use_ECLMAP)
+                    {
+                        args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\th" + now_game_enter + ".eclm");
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thecl_pack_map", "-1");
+                    }
+                    else
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thecl_pack", "-1");
+                    if (cmd_uncsted == "-1")
+                    {
+                        LogError("unknown command", true);
+                        return;
+                    }
+                    string cmd = THTK_Commander.CastCommand(
+                    cmd_uncsted, args);
+                    THTK_Commander.DoCommand(
+                        System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thecl.exe", cmd, workDir,  LogTHTKOutput);
                 }
-                string cmd = THTK_Commander.CastCommand(
-                cmd_uncsted, args);
-                THTK_Commander.DoCommand(
-                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thecl.exe", cmd, workDir);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -706,35 +793,39 @@ namespace thtkGUI_CS
         {
             try
             {
-                Dictionary<string, string> args = new Dictionary<string, string>();
-                args.Add("gameVer", now_game_enter);
-                args.Add("aim", txt_thanm_folder.Text);
-                args.Add("source", txt_thanm_archive.Text);
-                args.Add("des", txt_thanm_des.Text);
-                args.Add("this", System.IO.Directory.GetCurrentDirectory());
-
-                string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thanm_workDir", "this"), args);
-                string cmd_uncsted = null;
-                if (is_use_ANMMAP)
+                var archives = txt_thanm_archive.Text.Trim().Split(' ');
+                foreach (var archive in archives)
                 {
-                    args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\ANM_MAP_" + now_game_enter + ".txt");
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thanm_unpack_map", "-1");
+                    var archive_filepath = archive.Trim('\"');
+                    Dictionary<string, string> args = new Dictionary<string, string>();
+                    args.Add("gameVer", now_game_enter);
+                    args.Add("aim", txt_thanm_folder.Text);
+                    args.Add("source", archive_filepath);
+                    var des_path = System.IO.Path.GetDirectoryName(archive_filepath) + @"\ANM\" + System.IO.Path.GetFileNameWithoutExtension(archive_filepath) + anm_suffix;
+                    args.Add("des", des_path);
+                    args.Add("this", System.IO.Directory.GetCurrentDirectory());
+                    string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thanm_workDir", "this"), args);
+                    string cmd_uncsted = null;
+                    if (is_use_ANMMAP)
+                    {
+                        args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\th" + now_game_enter + ".anmm");
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thanm_unpack_map", "-1");
+                    }
+                    else
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thanm_unpack", "-1");
+                    if (cmd_uncsted == "-1")
+                    {
+                        LogError("unknown command", true);
+                        return;
+                    }
+                    string cmd = THTK_Commander.CastCommand(
+                    cmd_uncsted, args);
+                    THTK_Commander.DoCommand( System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thanm.exe", cmd, workDir, LogTHTKOutput);
                 }
-                else
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thanm_unpack", "-1");
-                if (cmd_uncsted == "-1")
-                {
-                    MessageBox.Show("unknown command", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                string cmd = THTK_Commander.CastCommand(
-                cmd_uncsted, args);
-                THTK_Commander.DoCommand(
-                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thanm.exe", cmd, workDir);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -749,15 +840,27 @@ namespace thtkGUI_CS
                         file.InitialDirectory = System.IO.Path.GetDirectoryName(path);
                 if (Directory.Exists(path))
                     file.InitialDirectory = path;
+                file.Multiselect=true;
                 file.ShowDialog();
-                if (file.FileName == "")
+                if (file.FileNames.Length==0)
+                {
                     return;
-                txt_thanm_archive.Text = file.FileName;
-                txt_thanm_folder.Text =
-               System.IO.Path.GetDirectoryName(file.FileName) + @"\ANM";
-                txt_thanm_des.Text =
-               System.IO.Path.GetDirectoryName(file.FileName) + @"\ANM\" +
-               System.IO.Path.GetFileNameWithoutExtension(file.FileName) + anm_suffix;
+                }else if (file.FileNames.Length==1)
+                {
+                    txt_thanm_archive.Text = file.FileName;
+                    txt_thanm_folder.Text =
+                    System.IO.Path.GetDirectoryName(file.FileName) + @"\ANM";
+                    txt_thanm_des.Text =
+                    System.IO.Path.GetDirectoryName(file.FileName) + @"\ANM\" +
+                    System.IO.Path.GetFileNameWithoutExtension(file.FileName) + anm_suffix;
+                }else{
+                    txt_thanm_archive.Text="";
+                    foreach (var f in file.FileNames){
+                        txt_thanm_archive.Text += "\""+f+"\" ";
+                    }
+                    txt_thanm_folder.Text =
+                    System.IO.Path.GetDirectoryName(file.FileNames.First()) + @"\ANM";
+                }
             }
             catch { }
         }
@@ -773,37 +876,42 @@ namespace thtkGUI_CS
         {
             try
             {
-                Dictionary<string, string> args = new Dictionary<string, string>();
-                args.Add("gameVer", now_game_enter);
-                args.Add("aim", txt_thanm_folder.Text);
-                args.Add("source", txt_thanm_archive.Text);
-                args.Add("des", txt_thanm_des.Text);
-                args.Add("this", System.IO.Directory.GetCurrentDirectory());
-                string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thanm_workDir", "this"), args);
-                string cmd_uncsted = null;
-                if (is_use_ANMMAP)
-                {
-                    args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\ANM_MAP_" + now_game_enter + ".txt");
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thanm_des_map", "-1");
+                var archives = txt_thanm_archive.Text.Trim().Split(' ');
+                foreach (var archive in archives) {
+                    var archive_filepath=archive.Trim('\"');
+                    Dictionary<string, string> args = new Dictionary<string, string>();
+                    args.Add("gameVer", now_game_enter);
+                    args.Add("aim", txt_thanm_folder.Text);
+                    args.Add("source", archive_filepath);
+                    var des_path=System.IO.Path.GetDirectoryName(archive_filepath) + @"\ANM\" + System.IO.Path.GetFileNameWithoutExtension(archive_filepath) + anm_suffix; 
+                    args.Add("des", des_path);
+                    args.Add("this", System.IO.Directory.GetCurrentDirectory());
+                    string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thanm_workDir", "this"), args);
+                    string cmd_uncsted = null;
+                    if (is_use_ANMMAP)
+                    {
+                        args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\th" + now_game_enter + ".anmm");
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thanm_des_map", "-1");
+                    }
+                    else
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thanm_des", "-1");
+                    if (cmd_uncsted == "-1")
+                    {
+                        LogError("unknown command", true);
+                        return;
+                    }
+                    string cmd = THTK_Commander.CastCommand(
+                    cmd_uncsted, args);
+                    string desFile = THTK_Commander.DoCommand(
+                        System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thanm.exe", cmd, workDir, LogTHTKOutput);
+                    StreamWriter fs = new StreamWriter(des_path);
+                    fs.Write(desFile);
+                    fs.Close();
                 }
-                else
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thanm_des", "-1");
-                if (cmd_uncsted == "-1")
-                {
-                    MessageBox.Show("unknown command", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                string cmd = THTK_Commander.CastCommand(
-                cmd_uncsted, args);
-                string desFile = THTK_Commander.DoCommand(
-                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thanm.exe", cmd, workDir);
-                StreamWriter fs = new StreamWriter(txt_thanm_des.Text);
-                fs.Write(desFile);
-                fs.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -811,35 +919,39 @@ namespace thtkGUI_CS
         {
             try
             {
-                Dictionary<string, string> args = new Dictionary<string, string>();
-                args.Add("gameVer", now_game_enter);
-                args.Add("aim", txt_thanm_folder.Text);
-                args.Add("source", txt_thanm_archive.Text);
-                args.Add("des", txt_thanm_des.Text);
-                args.Add("this", System.IO.Directory.GetCurrentDirectory());
-
-                string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thanm_workDir", "this"), args);
-                string cmd_uncsted = null;
-                if (is_use_ANMMAP)
+                var archives = txt_thanm_archive.Text.Trim().Split(' ');
+                foreach (var archive in archives)
                 {
-                    args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\ANM_MAP_" + now_game_enter + ".txt");
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thanm_pack_map", "-1");
+                    var archive_filepath = archive.Trim('\"');
+                    Dictionary<string, string> args = new Dictionary<string, string>();
+                    args.Add("gameVer", now_game_enter);
+                    args.Add("aim", txt_thanm_folder.Text);
+                    args.Add("source", archive_filepath);
+                    var des_path = System.IO.Path.GetDirectoryName(archive_filepath) + @"\ANM\" + System.IO.Path.GetFileNameWithoutExtension(archive_filepath) + anm_suffix;
+                    args.Add("des", des_path);
+                    args.Add("this", System.IO.Directory.GetCurrentDirectory());
+                    string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thanm_workDir", "this"), args);
+                    string cmd_uncsted = null;
+                    if (is_use_ANMMAP)
+                    {
+                        args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\th" + now_game_enter + ".anmm");
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thanm_pack_map", "-1");
+                    }
+                    else
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thanm_pack", "-1");
+                    if (cmd_uncsted == "-1")
+                    {
+                        LogError("unknown command", true);
+                        return;
+                    }
+                    string cmd = THTK_Commander.CastCommand(
+                    cmd_uncsted, args);
+                    THTK_Commander.DoCommand(System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thanm.exe", cmd, workDir, LogTHTKOutput);
                 }
-                else
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thanm_pack", "-1");
-                if (cmd_uncsted == "-1")
-                {
-                    MessageBox.Show("unknown command", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                string cmd = THTK_Commander.CastCommand(
-                cmd_uncsted, args);
-                THTK_Commander.DoCommand(
-                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thanm.exe", cmd, workDir);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -847,10 +959,22 @@ namespace thtkGUI_CS
         private void Btn_thmsg_file_file_Click(object sender, EventArgs e)
         {
             OpenFileDialog file = new OpenFileDialog { Filter = msg_suffix_file };
+            file.Multiselect=true;
             file.ShowDialog();
-            if (file.FileName == "")
+            if (file.FileNames.Length==0)
                 return;
-            txt_thmsg_file.Text = file.FileName;
+            else if (file.FileNames.Length==1)
+            {
+                txt_thmsg_file.Text = file.FileNames.First();
+            }
+            else
+            {
+                txt_thmsg_file.Text = "";
+                foreach (var s in file.FileNames)
+                {
+                    txt_thmsg_file.Text +="\""+s+"\" ";
+                }
+            }
         }
         private void Btn_thmsg_archive_file_Click(object sender, EventArgs e)
         {
@@ -863,13 +987,29 @@ namespace thtkGUI_CS
                         file.InitialDirectory = System.IO.Path.GetDirectoryName(path);
                 if (Directory.Exists(path))
                     file.InitialDirectory = path;
+                file.Multiselect=true;
                 file.ShowDialog();
-                if (file.FileName == "")
+                if (file.FileNames.Length==0)
                     return;
-                txt_thmsg_archive.Text = file.FileName;
-                txt_thmsg_file.Text =
-             System.IO.Path.GetDirectoryName(file.FileName) + @"\MSG\" +
-             System.IO.Path.GetFileNameWithoutExtension(file.FileName) + msg_suffix;
+                else if (file.FileNames.Length==1)
+                {
+                    txt_thmsg_archive.Text = file.FileNames.First();
+                    txt_thmsg_file.Text =
+                    System.IO.Path.GetDirectoryName(file.FileNames.First()) + @"\MSG\" +
+                    System.IO.Path.GetFileNameWithoutExtension(file.FileNames.First()) + msg_suffix;
+                }
+                else
+                {
+                    txt_thmsg_archive.Text = "";
+                    txt_thmsg_file.Text ="";
+                    foreach (string s in file.FileNames)
+                    {
+                        txt_thmsg_archive.Text += "\"" + s+"\" ";
+                        txt_thmsg_file.Text +=
+                            "\""+System.IO.Path.GetDirectoryName(s) + @"\MSG\" + System.IO.Path.GetFileNameWithoutExtension(s) + msg_suffix+"\" ";
+                    }
+                }
+
             }
             catch { }
         }
@@ -877,56 +1017,59 @@ namespace thtkGUI_CS
         {
             try
             {
-                if (!Directory.Exists(System.IO.Path.GetDirectoryName(txt_thmsg_file.Text)))//若文件夹不存在则新建文件夹   
-                {
-                    Directory.CreateDirectory(System.IO.Path.GetDirectoryName(txt_thmsg_file.Text)); //新建文件夹   
+                var archives = txt_thmsg_archive.Text.Trim().Split(' ');
+                var aims = txt_thmsg_file.Text.Trim().Split(' ');
+                if (aims.Length!=archives.Length){
+                    throw new System.ArgumentException("number of MSG files not equal to number of dumped files");
                 }
-                FileStream fs = new FileStream(txt_thmsg_file.Text, FileMode.Create);
-                fs.Close();
-                Dictionary<string, string> args = new Dictionary<string, string>();
-                args.Add("gameVer", now_game_enter);
-                args.Add("aim", txt_thmsg_file.Text);
-                args.Add("source", txt_thmsg_archive.Text);
-                args.Add("this", System.IO.Directory.GetCurrentDirectory());
-
-                string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thmsg_workDir", "this"), args);
-                string cmd_uncsted = null;
-                if (is_use_MSGMAP)
+                for (int i = 0; i<archives.Length; i++)
                 {
-                    args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\MSG_MAP_" + now_game_enter + ".txt");
-                    if(cbox_ed.Checked)
+                    var archive_path = archives[i].Trim('\"');
+                    var aim_path = aims[i].Trim('\"');
+                    if (!Directory.Exists(System.IO.Path.GetDirectoryName(aim_path)))
                     {
-                        cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_unpack_map_ed", "-1");
+                        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(aim_path));
                     }
-                    else
+                    FileStream fs = new FileStream(aim_path, FileMode.Create);
+                    fs.Close();
+                    Dictionary<string, string> args = new Dictionary<string, string>();
+                    args.Add("gameVer", now_game_enter);
+                    args.Add("aim", aim_path);
+                    args.Add("source", archive_path);
+                    args.Add("this", System.IO.Directory.GetCurrentDirectory());
+                    string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thmsg_workDir", "this"), args);
+                    string cmd_uncsted = null;
+                    if (is_use_MSGMAP)
                     {
-                        cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_unpack_map", "-1");
+                        args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\th" + now_game_enter + ".msgm");
+                        if (cbox_ed.Checked)
+                        {
+                            cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_unpack_map_ed", "-1");
+                        }else{
+                            cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_unpack_map", "-1");
+                        }
+                    }else{
+                        if (cbox_ed.Checked)
+                        {
+                            cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_unpack_ed", "-1");
+                        }else{
+                            cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_unpack", "-1");
+                        }
                     }
+                    if (cmd_uncsted == "-1")
+                    {
+                        LogError("unknown command", true);
+                        return;
+                    }
+                    string cmd = THTK_Commander.CastCommand(
+                    cmd_uncsted, args);
+                    THTK_Commander.DoCommand(
+                        System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thmsg.exe", cmd, workDir, LogTHTKOutput);
                 }
-                else
-                {
-                    if (cbox_ed.Checked)
-                    {
-                        cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_unpack_ed", "-1");
-                    }
-                    else
-                    {
-                        cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_unpack", "-1");
-                    }
-                }
-                if (cmd_uncsted == "-1")
-                {
-                    MessageBox.Show("unknown command", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                string cmd = THTK_Commander.CastCommand(
-                cmd_uncsted, args);
-                THTK_Commander.DoCommand(
-                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thmsg.exe", cmd, workDir);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -934,51 +1077,66 @@ namespace thtkGUI_CS
         {
             try
             {
-                Dictionary<string, string> args = new Dictionary<string, string>();
-                args.Add("gameVer", now_game_enter);
-                args.Add("aim", txt_thmsg_archive.Text);
-                args.Add("source", txt_thmsg_file.Text);
-                args.Add("this", System.IO.Directory.GetCurrentDirectory());
-
-                string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thmsg_workDir", "this"), args);
-                string cmd_uncsted = null;
-                if (is_use_MSGMAP)
+                var archives = txt_thmsg_file.Text.Trim().Split(' ');
+                var aims = txt_thmsg_archive.Text.Trim().Split(' ');
+                if (aims.Length!=archives.Length)
                 {
-
-                    args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\MSG_MAP_" + now_game_enter + ".txt");
-                    if (cbox_ed.Checked)
+                    throw new System.ArgumentException("number of MSG files not equal to number of dumped files");
+                }
+                for (int i = 0; i<archives.Length; i++)
+                {
+                    var archive_path = archives[i].Trim('\"');
+                    var aim_path = aims[i].Trim('\"');
+                    if (!Directory.Exists(System.IO.Path.GetDirectoryName(aim_path)))
                     {
-                        cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_pack_map_ed", "-1");
+                        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(aim_path));
+                    }
+                    FileStream fs = new FileStream(aim_path, FileMode.Create);
+                    fs.Close();
+                    Dictionary<string, string> args = new Dictionary<string, string>();
+                    args.Add("gameVer", now_game_enter);
+                    args.Add("aim", aim_path);
+                    args.Add("source", archive_path);
+                    args.Add("this", System.IO.Directory.GetCurrentDirectory());
+                    string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thmsg_workDir", "this"), args);
+                    string cmd_uncsted = null;
+                    if (is_use_MSGMAP)
+                    {
+                        args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\th" + now_game_enter + ".msgm");
+                        if (cbox_ed.Checked)
+                        {
+                            cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_pack_map_ed", "-1");
+                        }
+                        else
+                        {
+                            cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_pack_map", "-1");
+                        }
                     }
                     else
                     {
-                        cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_pack_map", "-1");
+                        if (cbox_ed.Checked)
+                        {
+                            cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_pack_ed", "-1");
+                        }
+                        else
+                        {
+                            cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_pack", "-1");
+                        }
                     }
-                }
-                else
-                {
-                    if (cbox_ed.Checked)
+                    if (cmd_uncsted == "-1")
                     {
-                        cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_pack_ed", "-1");
+                        LogError("unknown command", true);
+                        return;
                     }
-                    else
-                    {
-                        cmd_uncsted = config_command.GetValue(ver_thtk, "thmsg_pack", "-1");
-                    }
+                    string cmd = THTK_Commander.CastCommand(
+                    cmd_uncsted, args);
+                    THTK_Commander.DoCommand(
+                        System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thmsg.exe", cmd, workDir, LogTHTKOutput);
                 }
-                if (cmd_uncsted == "-1")
-                {
-                    MessageBox.Show("unknown command", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                string cmd = THTK_Commander.CastCommand(
-                cmd_uncsted, args);
-                THTK_Commander.DoCommand(
-                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thmsg.exe", cmd, workDir);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -986,29 +1144,57 @@ namespace thtkGUI_CS
         private void Btn_thstd_file_file_Click(object sender, EventArgs e)
         {
             OpenFileDialog file = new OpenFileDialog { Filter = std_suffix_file };
+            file.Multiselect=true;
             file.ShowDialog();
-            if (file.FileName == "")
+            if (file.FileNames.Length==0)
                 return;
-            txt_thstd_file.Text = file.FileName;
+            else if (file.FileNames.Length==1)
+            {
+                txt_thstd_file.Text = file.FileNames.First();
+            }
+            else
+            {
+                txt_thstd_file.Text = "";
+                foreach (var s in file.FileNames)
+                {
+                    txt_thstd_file.Text +="\""+s+"\" ";
+                }
+            }
         }
         private void Btn_thstd_archive_file_Click(object sender, EventArgs e)
         {
             OpenFileDialog file = new OpenFileDialog { Filter = "std|*.std|allFile|*.*" };
             try
             {
-                string path = txt_thstd_archive.Text;
+                string path = txt_thmsg_archive.Text;
                 if (File.Exists(path))
                     if (Directory.Exists(System.IO.Path.GetDirectoryName(path)))
                         file.InitialDirectory = System.IO.Path.GetDirectoryName(path);
                 if (Directory.Exists(path))
                     file.InitialDirectory = path;
+                file.Multiselect=true;
                 file.ShowDialog();
-                if (file.FileName == "")
+                if (file.FileNames.Length==0)
                     return;
-                txt_thstd_archive.Text = file.FileName;
-                txt_thstd_file.Text =
-             System.IO.Path.GetDirectoryName(file.FileName) + @"\STD\" +
-             System.IO.Path.GetFileNameWithoutExtension(file.FileName) + std_suffix;
+                else if (file.FileNames.Length==1)
+                {
+                    txt_thstd_archive.Text = file.FileNames.First();
+                    txt_thstd_file.Text =
+                    System.IO.Path.GetDirectoryName(file.FileNames.First()) + @"\STD\" +
+                    System.IO.Path.GetFileNameWithoutExtension(file.FileNames.First()) + msg_suffix;
+                }
+                else
+                {
+                    txt_thstd_archive.Text = "";
+                    txt_thstd_file.Text ="";
+                    foreach (string s in file.FileNames)
+                    {
+                        txt_thstd_archive.Text += "\"" + s+"\" ";
+                        txt_thstd_file.Text +=
+                            "\""+System.IO.Path.GetDirectoryName(s) + @"\STD\" + System.IO.Path.GetFileNameWithoutExtension(s) + std_suffix+"\" ";
+                    }
+                }
+
             }
             catch { }
         }
@@ -1016,40 +1202,50 @@ namespace thtkGUI_CS
         {
             try
             {
-                if (!Directory.Exists(System.IO.Path.GetDirectoryName(txt_thstd_file.Text)))//若文件夹不存在则新建文件夹   
+                var archives = txt_thstd_archive.Text.Trim().Split(' ');
+                var aims = txt_thstd_file.Text.Trim().Split(' ');
+                if (aims.Length!=archives.Length)
                 {
-                    Directory.CreateDirectory(System.IO.Path.GetDirectoryName(txt_thstd_file.Text)); //新建文件夹   
+                    throw new System.ArgumentException("number of STD files not equal to number of dumped files");
                 }
-                FileStream fs = new FileStream(txt_thstd_file.Text, FileMode.Create);
-                fs.Close();
-                Dictionary<string, string> args = new Dictionary<string, string>();
-                args.Add("gameVer", now_game_enter);
-                args.Add("aim", txt_thstd_file.Text);
-                args.Add("source", txt_thstd_archive.Text);
-                args.Add("this", System.IO.Directory.GetCurrentDirectory());
-
-                string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thstd_workDir", "this"), args);
-                string cmd_uncsted = null;
-                if (is_use_STDMAP)
+                for (int i = 0; i<archives.Length; i++)
                 {
-                    args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\STD_MAP_" + now_game_enter + ".txt");
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thstd_unpack_map", "-1");
+                    var archive_path = archives[i].Trim('\"');
+                    var aim_path = aims[i].Trim('\"');
+                    if (!Directory.Exists(System.IO.Path.GetDirectoryName(aim_path)))
+                    {
+                        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(aim_path));
+                    }
+                    FileStream fs = new FileStream(aim_path, FileMode.Create);
+                    fs.Close();
+                    Dictionary<string, string> args = new Dictionary<string, string>();
+                    args.Add("gameVer", now_game_enter);
+                    args.Add("aim", aim_path);
+                    args.Add("source", archive_path);
+                    args.Add("this", System.IO.Directory.GetCurrentDirectory());
+                    string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thstd_workDir", "this"), args);
+                    string cmd_uncsted = null;
+                    if (is_use_STDMAP)
+                    {
+                        args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\th" + now_game_enter + ".stdm");
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thstd_unpack_map", "-1");
+                    }
+                    else
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thstd_unpack", "-1");
+                    if (cmd_uncsted == "-1")
+                    {
+                        LogError("unknown command", true);
+                        return;
+                    }
+                    string cmd = THTK_Commander.CastCommand(
+                    cmd_uncsted, args);
+                    THTK_Commander.DoCommand(
+                        System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thstd.exe", cmd, workDir, LogTHTKOutput);
                 }
-                else
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thstd_unpack", "-1");
-                if (cmd_uncsted == "-1")
-                {
-                    MessageBox.Show("unknown command", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                string cmd = THTK_Commander.CastCommand(
-                cmd_uncsted, args);
-                THTK_Commander.DoCommand(
-                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thstd.exe", cmd, workDir);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -1057,34 +1253,50 @@ namespace thtkGUI_CS
         {
             try
             {
-                Dictionary<string, string> args = new Dictionary<string, string>();
-                args.Add("gameVer", now_game_enter);
-                args.Add("aim", txt_thstd_archive.Text);
-                args.Add("source", txt_thstd_file.Text);
-                args.Add("this", System.IO.Directory.GetCurrentDirectory());
-
-                string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thstd_workDir", "this"), args);
-                string cmd_uncsted = null;
-                if (is_use_STDMAP)
+                var archives = txt_thstd_file.Text.Trim().Split(' ');
+                var aims = txt_thstd_archive.Text.Trim().Split(' ');
+                if (aims.Length!=archives.Length)
                 {
-                    args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\STD_MAP_" + now_game_enter + ".txt");
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thstd_pack_map", "-1");
+                    throw new System.ArgumentException("number of STD files not equal to number of dumped files");
                 }
-                else
-                    cmd_uncsted = config_command.GetValue(ver_thtk, "thstd_pack", "-1");
-                if (cmd_uncsted == "-1")
+                for (int i = 0; i<archives.Length; i++)
                 {
-                    MessageBox.Show("unknown command", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    var archive_path = archives[i].Trim('\"');
+                    var aim_path = aims[i].Trim('\"');
+                    if (!Directory.Exists(System.IO.Path.GetDirectoryName(aim_path)))
+                    {
+                        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(aim_path));
+                    }
+                    FileStream fs = new FileStream(aim_path, FileMode.Create);
+                    fs.Close();
+                    Dictionary<string, string> args = new Dictionary<string, string>();
+                    args.Add("gameVer", now_game_enter);
+                    args.Add("aim", aim_path);
+                    args.Add("source", archive_path);
+                    args.Add("this", System.IO.Directory.GetCurrentDirectory());
+                    string workDir = THTK_Commander.getWorkDir(config_command.GetValue(ver_thtk, "thstd_workDir", "this"), args);
+                    string cmd_uncsted = null;
+                    if (is_use_STDMAP)
+                    {
+                        args.Add("map", System.IO.Directory.GetCurrentDirectory() + @"\MAP\th" + now_game_enter + ".stdm");
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thstd_pack_map", "-1");
+                    }
+                    else
+                        cmd_uncsted = config_command.GetValue(ver_thtk, "thstd_pack", "-1");
+                    if (cmd_uncsted == "-1")
+                    {
+                        LogError("unknown command", true);
+                        return;
+                    }
+                    string cmd = THTK_Commander.CastCommand(
+                    cmd_uncsted, args);
+                    THTK_Commander.DoCommand(
+                        System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thstd.exe", cmd, workDir, LogTHTKOutput);
                 }
-                string cmd = THTK_Commander.CastCommand(
-                cmd_uncsted, args);
-                THTK_Commander.DoCommand(
-                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thstd.exe", cmd, workDir);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -1153,17 +1365,17 @@ namespace thtkGUI_CS
                 cmd_uncsted = config_command.GetValue(ver_thtk, "thdat_unpack", "-1");
                 if (cmd_uncsted == "-1")
                 {
-                    MessageBox.Show("unknown command", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LogError("unknown command", true);
                     return;
                 }
                 string cmd = THTK_Commander.CastCommand(
                 cmd_uncsted, args);
                 THTK_Commander.DoCommand(
-                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thdat.exe", cmd, workDir);
+                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thdat.exe", cmd, workDir, LogTHTKOutput);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -1183,20 +1395,20 @@ namespace thtkGUI_CS
                 cmd_uncsted = config_command.GetValue(ver_thtk, "thdat_list", "-1");
                 if (cmd_uncsted == "-1")
                 {
-                    MessageBox.Show("unknown command", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LogError("unknown command", true);
                     return;
                 }
                 string cmd = THTK_Commander.CastCommand(
                 cmd_uncsted, args);
                 string desFile = THTK_Commander.DoCommand(
-                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thdat.exe", cmd, workDir);
+                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thdat.exe", cmd, workDir, LogTHTKOutput);
                 StreamWriter fs = new StreamWriter(txt_thdat_list.Text);
                 fs.Write(desFile);
                 fs.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -1234,18 +1446,18 @@ namespace thtkGUI_CS
                 cmd_uncsted = config_command.GetValue(ver_thtk, "thdat_pack", "-1");
                 if (cmd_uncsted == "-1")
                 {
-                    MessageBox.Show("unknown command", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LogError("unknown command", true);
                     return;
                 }
                 string cmd = THTK_Commander.CastCommand(
                 cmd_uncsted, args);
                 THTK_Commander.DoCommand(
-                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thdat.exe", cmd, workDir);
+                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thdat.exe", cmd, workDir, LogTHTKOutput);
 
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -1280,17 +1492,17 @@ namespace thtkGUI_CS
                 cmd_uncsted = config_command.GetValue(ver_thtk, "thanm_rep", "-1");
                 if (cmd_uncsted == "-1")
                 {
-                    MessageBox.Show("unknown command", "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LogError("unknown command", true);
                     return;
                 }
                 string cmd = THTK_Commander.CastCommand(
                 cmd_uncsted, args);
                 THTK_Commander.DoCommand(
-                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thanm.exe", cmd, workDir);
+                    System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thanm.exe", cmd, workDir, LogTHTKOutput);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "From thtk_gui", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogError(ex.Message, true);
                 return;
             }
         }
@@ -1334,9 +1546,16 @@ namespace thtkGUI_CS
             }
             catch(Exception ex)
             {
-
+                LogError(ex.Message, true);
+                return;
             }
         }
-     }
+
+        private void ignoreErrorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            (sender as ToolStripMenuItem).Checked = !(sender as ToolStripMenuItem).Checked;
+            ignore_error = (sender as ToolStripMenuItem).Checked;
+        }
+    }
 }
 

@@ -2,5 +2,11 @@
 # 此 .gitignore 文件已由 Microsoft(R) Visual Studio 自动创建。
 ################################################################################
 
+/thtkGUI_CS/bin/Debug
+/thtkGUI_CS/bin/Release/thtk
 /thtkGUI_CS/bin/Release/MAP
+/thtkGUI_CS/bin/Release/thtkGUI_CS.pdb
+/thtkGUI_CS/bin/Release/thtkGUI_CS.exe.config
+/thtkGUI_CS/bin/Release/thtkGUI_CS.exe
+/thtkGUI_CS/obj
 /.vs/thtkGUI_CS

@@ -61,30 +61,32 @@ namespace thtkGUI_CS
             }
             return ret;
         }
-        public static string DoCommand(string program_path,string command, string workingDc = null,bool is_ignore=false)
+        public delegate void LogFunc(string str);
+        public static string DoCommand(string program_path,string command, string workingDc,LogFunc log)
         {
             string opt2 = "";
             string output = "";
             System.Diagnostics.Process p = new System.Diagnostics.Process();
             p.StartInfo.FileName = program_path;
             p.StartInfo.Arguments = command;
-            p.StartInfo.UseShellExecute = false;        //是否使用操作系统shell启动
-            p.StartInfo.RedirectStandardInput = true;   //接受来自调用程序的输入信息
-            p.StartInfo.RedirectStandardOutput = true;  //由调用程序获取输出信息
+            p.StartInfo.UseShellExecute = false;        
+            p.StartInfo.RedirectStandardInput = true;   
+            p.StartInfo.RedirectStandardOutput = true;  
             p.StartInfo.RedirectStandardError = true;
             if(workingDc!=null && workingDc!="")
             {
                 p.StartInfo.WorkingDirectory = workingDc;
             }
-            if (!Directory.Exists(workingDc))//若文件夹不存在则新建文件夹   
+            if (!Directory.Exists(workingDc))
             {
-                Directory.CreateDirectory(workingDc); //新建文件夹   
+                Directory.CreateDirectory(workingDc);
             }
             p.Start();
             opt2 = p.StandardOutput.ReadToEnd();
             output = p.StandardError.ReadToEnd();
-            if(output!=null && output!="" && is_ignore==false)
-                MessageBox.Show(output,"Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
+
+            if (output!=null && output!="")
+                log(output);
             p.WaitForExit();
             p.Close();
             return opt2;
