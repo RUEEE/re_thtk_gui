@@ -571,7 +571,7 @@ namespace thtkGUI_CS
             int wd = Width;
             int folder_X = wd - 40;
             int button_file_X = wd - 70;
-            int txt_X = wd - 135;
+            int txt_X = wd - 180;
             //dat
             Folder_thdat.Width = folder_X;
             btn_thdat_folder_file.Left = button_file_X;
