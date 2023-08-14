@@ -2,7 +2,7 @@
 	config中有些地方是没法写注释的,写了就会被清除掉注意.
 一.游戏
 	config/all_game.ini中的[game]节内可以加入其它的游戏,下面的路径键会在软件关闭时自动生成,不用填写,格式自行参考
-	MAP文件夹中存的是键值对,想添加键值对的则按照XXX_MAP_YYY.txt的格式添加,其中XXX为类型,可选ECL,ANM,MSG,STD(虽然thtk只支持ecl),YYY为游戏版本号,如th15的则是15,与config/all_game.ini中的值对应
+	MAP文件夹中存的是键值对,想添加键值对的则按照thYY.XXXm的格式添加,其中XXX为类型,可选ECL,ANM,MSG,STD,YYY为游戏版本号,如th15的则是15,与config/all_game.ini中的值对应
 二.thtk
 	config/command.ini中是thtk的命令,这个ini中的注释不会被消除,可以根据里面的内容来修改以适应不同版本,内置了thtk11和thtk8的教程
 	thtk放在/thtk文件夹下,文件夹名与config/command.ini中的节名对应
