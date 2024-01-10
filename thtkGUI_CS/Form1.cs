@@ -10,6 +10,7 @@ using System.Windows.Forms;
 
 using System.IO;
 using System.Runtime.Remoting.Messaging;
+using System.Collections;
 
 namespace thtkGUI_CS
 {
@@ -718,12 +719,27 @@ namespace thtkGUI_CS
             }
             catch { }
         }
+
+        private string[] GetStringsFromPaths(string paths)
+        {
+            paths=paths.Trim();
+            var paths_with_blank = paths.Split('"');
+            var arrs_res = new System.Collections.ArrayList();
+            foreach(var i in paths_with_blank)
+            {
+                if(!string.IsNullOrWhiteSpace(i)){
+                    arrs_res.Add(i.Trim());
+                }
+            }
+            return (string[])arrs_res.ToArray(typeof(string));
+        }
+
         private void Btn_thecl_unpack_Click(object sender, EventArgs e)
         {
             try
             {
-                var archives = txt_thecl_archive.Text.Trim().Split(' ');
-                var aims = txt_thecl_file.Text.Trim().Split(' ');
+                var archives = GetStringsFromPaths(txt_thecl_archive.Text);
+                var aims = GetStringsFromPaths(txt_thecl_file.Text);
                 if(aims.Length!=archives.Length)
                 {
                     throw new System.ArgumentException("number of ECL files not equal to number of dumped files");
@@ -773,8 +789,8 @@ namespace thtkGUI_CS
         {
             try
             {
-                var archives = txt_thecl_archive.Text.Trim().Split(' ');
-                var aims = txt_thecl_file.Text.Trim().Split(' ');
+                var archives = GetStringsFromPaths(txt_thecl_archive.Text);
+                var aims = GetStringsFromPaths(txt_thecl_file.Text);
                 if (aims.Length!=archives.Length)
                 {
                     throw new System.ArgumentException("number of ECL files not equal to number of dumped files");
@@ -819,7 +835,7 @@ namespace thtkGUI_CS
         {
             try
             {
-                var archives = txt_thanm_archive.Text.Trim().Split(' ');
+                var archives = GetStringsFromPaths(txt_thanm_archive.Text);
                 foreach (var archive in archives)
                 {
                     var archive_filepath = archive.Trim('\"');
@@ -902,7 +918,7 @@ namespace thtkGUI_CS
         {
             try
             {
-                var archives = txt_thanm_archive.Text.Trim().Split(' ');
+                var archives = GetStringsFromPaths(txt_thanm_archive.Text);
                 foreach (var archive in archives) {
                     var archive_filepath=archive.Trim('\"');
                     Dictionary<string, string> args = new Dictionary<string, string>();
@@ -945,7 +961,7 @@ namespace thtkGUI_CS
         {
             try
             {
-                var archives = txt_thanm_archive.Text.Trim().Split(' ');
+                var archives = GetStringsFromPaths(txt_thanm_archive.Text);
                 foreach (var archive in archives)
                 {
                     var archive_filepath = archive.Trim('\"');
@@ -1043,8 +1059,8 @@ namespace thtkGUI_CS
         {
             try
             {
-                var archives = txt_thmsg_archive.Text.Trim().Split(' ');
-                var aims = txt_thmsg_file.Text.Trim().Split(' ');
+                var archives = GetStringsFromPaths(txt_thmsg_archive.Text);
+                var aims = GetStringsFromPaths(txt_thmsg_file.Text);
                 if (aims.Length!=archives.Length){
                     throw new System.ArgumentException("number of MSG files not equal to number of dumped files");
                 }
@@ -1103,8 +1119,8 @@ namespace thtkGUI_CS
         {
             try
             {
-                var archives = txt_thmsg_file.Text.Trim().Split(' ');
-                var aims = txt_thmsg_archive.Text.Trim().Split(' ');
+                var archives = GetStringsFromPaths(txt_thmsg_file.Text);
+                var aims = GetStringsFromPaths(txt_thmsg_archive.Text);
                 if (aims.Length!=archives.Length)
                 {
                     throw new System.ArgumentException("number of MSG files not equal to number of dumped files");
@@ -1228,8 +1244,8 @@ namespace thtkGUI_CS
         {
             try
             {
-                var archives = txt_thstd_archive.Text.Trim().Split(' ');
-                var aims = txt_thstd_file.Text.Trim().Split(' ');
+                var archives = GetStringsFromPaths(txt_thstd_archive.Text);
+                var aims = GetStringsFromPaths(txt_thstd_file.Text);
                 if (aims.Length!=archives.Length)
                 {
                     throw new System.ArgumentException("number of STD files not equal to number of dumped files");
@@ -1279,8 +1295,8 @@ namespace thtkGUI_CS
         {
             try
             {
-                var archives = txt_thstd_file.Text.Trim().Split(' ');
-                var aims = txt_thstd_archive.Text.Trim().Split(' ');
+                var archives = GetStringsFromPaths(txt_thstd_file.Text);
+                var aims = GetStringsFromPaths(txt_thstd_archive.Text);
                 if (aims.Length!=archives.Length)
                 {
                     throw new System.ArgumentException("number of STD files not equal to number of dumped files");
@@ -1460,8 +1476,7 @@ namespace thtkGUI_CS
                 for (int i = 0; i < jmp_line; i++)
                     line = fs.ReadLine();
                 string names_path = "";
-                while ((line = fs.ReadLine()) != null)
-                {
+                while ((line = fs.ReadLine()) != null){
                     //names = names + "\"" + (line.Split(' ')[token_num]) + "\" ";
                     names_path = names_path + "\"" + workDir + @"\" + (line.Split(' ')[token_num]) + "\" ";
                 }
