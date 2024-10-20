@@ -188,6 +188,8 @@ namespace thtkGUI_CS
                     std_suffix_file = "std|*" + std_suffix + ";*.txt|allFile|*.*";
                 if (msg_suffix != ".txt" && msg_suffix != "")
                     msg_suffix_file = "msg|*" + msg_suffix + ";*.txt|allFile|*.*";
+                if (std_suffix != ".txt" && std_suffix != "")
+                    std_suffix_file = "std|*" + std_suffix + ";*.txt|allFile|*.*";
                 buf = config_main.GetValue("main", "checkBox_is_ed", "false");
                 if (Convert.ToBoolean(buf))
                 {
@@ -1223,7 +1225,7 @@ namespace thtkGUI_CS
                     txt_thstd_archive.Text = file.FileNames.First();
                     txt_thstd_file.Text =
                     System.IO.Path.GetDirectoryName(file.FileNames.First()) + @"\STD\" +
-                    System.IO.Path.GetFileNameWithoutExtension(file.FileNames.First()) + msg_suffix;
+                    System.IO.Path.GetFileNameWithoutExtension(file.FileNames.First()) + std_suffix;
                 }
                 else
                 {
@@ -1444,6 +1446,10 @@ namespace thtkGUI_CS
                 cmd_uncsted, args);
                 string desFile = THTK_Commander.DoCommand(
                     System.IO.Directory.GetCurrentDirectory() + @"\thtk\" + ver_thtk + @"\thdat.exe", cmd, workDir, LogTHTKOutput);
+                if(!Directory.Exists(Path.GetDirectoryName(txt_thdat_list.Text)))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(txt_thdat_list.Text));
+                }
                 StreamWriter fs = new StreamWriter(txt_thdat_list.Text);
                 fs.Write(desFile);
                 fs.Close();
