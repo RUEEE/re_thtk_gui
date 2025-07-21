@@ -57,6 +57,23 @@ namespace thtkGUI_CS
             }
             return null;
         }
+        public List<string> GetSecs()
+        {
+            List<string> strs =  new List<string>();
+            foreach(var it in Map)
+            {
+                strs.Add(it.Key);
+            }
+            return strs;
+        }
+        public Dictionary<string,string> GetKeysInSec(string key)
+        {
+            if (Map.ContainsKey(key))
+            {
+                return new Dictionary<string, string>(Map[key]);
+            }
+            return null;
+        }
         public bool Is_have_key(string Sec,string Key)
         {
             if (Map.ContainsKey(Sec))
@@ -118,7 +135,7 @@ namespace thtkGUI_CS
             Map = new Dictionary<string, Dictionary<string, string>>();
             string line = File.ReadLine();
             string nowSec = null;
-            Regex reg_sec = new Regex(@"^\[(\S+)\]$");
+            Regex reg_sec = new Regex(@"^\[(\S*)\]$");
             Regex reg_key_val = new Regex(@"^([^=]+)\=([^=]*)$");
             Regex reg_space = new Regex(@"^\s*$");
             Regex reg_comment = new Regex(@"^#");
@@ -141,7 +158,7 @@ namespace thtkGUI_CS
                     }
                     catch (ArgumentException)
                     {
-                        throw new Exception("配置文件中存在多个相同节");
+                        throw new Exception($"配置文件{File_path}中存在多个相同节");
                     }
                 }
                 else
@@ -152,7 +169,7 @@ namespace thtkGUI_CS
                         string val, key;
                         if (nowSec == null)
                         {
-                            throw new Exception("在节之前发现键值");
+                            throw new Exception($"配置文件{File_path}在节之前发现键值");
                         }
                         val = match.Result("$1");
                         key = match.Result("$2");
@@ -162,7 +179,7 @@ namespace thtkGUI_CS
                         }
                         catch (ArgumentException)
                         {
-                            throw new Exception("配置文件中存在多个相同键");
+                            throw new Exception($"配置文件{File_path}中存在多个相同键");
                         }
                     }
                     else
@@ -170,7 +187,7 @@ namespace thtkGUI_CS
                         match = reg_space.Match(line);
                         if (!match.Success)
                         {
-                            throw new Exception("配置文件中存在非空行非键值");
+                            throw new Exception($"配置文件{File_path}中存在非空行非键值");
                         }
                     }
                 }

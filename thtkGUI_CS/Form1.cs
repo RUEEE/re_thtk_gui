@@ -133,7 +133,7 @@ namespace thtkGUI_CS
             }
 
             Change_game(now_game_buf);
-            now_game = now_game_buf;
+            
         }
         private void Init_Command()
         {
@@ -463,28 +463,35 @@ namespace thtkGUI_CS
                     this.Close();
                     return;
                 }
-                lbl_cap.Text = nwGame;
-                txt_thdat_list.Text = config_game.GetValue(nwGame, "path_thdat_list", "");
-                txt_thdat_folder.Text = config_game.GetValue(nwGame, "path_thdat_up", "");
-                txt_thdat_archive.Text = config_game.GetValue(nwGame, "path_thdat_p", "");
-                txt_thanm_folder.Text = config_game.GetValue(nwGame, "path_thanm_up", "");
-                txt_thanm_archive.Text = config_game.GetValue(nwGame, "path_thanm_p", "");
-                txt_thanm_des.Text = config_game.GetValue(nwGame, "path_thanm_des", "");
-                cmb_entry.Text = config_game.GetValue(nwGame, "path_thanm_entry", "");
-                txt_thanm_entry_file.Text = config_game.GetValue(nwGame, "path_thanm_file", "");
-                txt_thecl_archive.Text = config_game.GetValue(nwGame, "path_thecl_p", "");
-                txt_thecl_file.Text = config_game.GetValue(nwGame, "path_thecl_up", "");
-                txt_thmsg_archive.Text = config_game.GetValue(nwGame, "path_thmsg_p", "");
-                txt_thmsg_file.Text = config_game.GetValue(nwGame, "path_thmsg_up", "");
-                txt_thstd_archive.Text = config_game.GetValue(nwGame, "path_thstd_p", "");
-                txt_thstd_file.Text = config_game.GetValue(nwGame, "path_thstd_up", "");
-                now_game = nwGame;
                 now_game_enter = config_game.GetValue("game", nwGame, "-1");
                 if (now_game_enter == "-1")
                 {
-                    LogError("unknown game version", false);
-                    return;
+                    LogError($"unknown game version '{nwGame}'", false);
+                    var lst = config_game.GetKeysInSec("game");
+                    if (lst.Count>=1)
+                    {
+                        now_game_enter = lst.ToList()[0].Value;
+                        now_game = lst.ToList()[0].Key;
+                    }
+                } else {
+                    now_game = nwGame;
                 }
+                lbl_cap.Text = now_game;
+                txt_thdat_list.Text = config_game.GetValue(now_game, "path_thdat_list", "");
+                txt_thdat_folder.Text = config_game.GetValue(now_game, "path_thdat_up", "");
+                txt_thdat_archive.Text = config_game.GetValue(now_game, "path_thdat_p", "");
+                txt_thanm_folder.Text = config_game.GetValue(now_game, "path_thanm_up", "");
+                txt_thanm_archive.Text = config_game.GetValue(now_game, "path_thanm_p", "");
+                txt_thanm_des.Text = config_game.GetValue(now_game, "path_thanm_des", "");
+                cmb_entry.Text = config_game.GetValue(now_game, "path_thanm_entry", "");
+                txt_thanm_entry_file.Text = config_game.GetValue(now_game, "path_thanm_file", "");
+                txt_thecl_archive.Text = config_game.GetValue(now_game, "path_thecl_p", "");
+                txt_thecl_file.Text = config_game.GetValue(now_game, "path_thecl_up", "");
+                txt_thmsg_archive.Text = config_game.GetValue(now_game, "path_thmsg_p", "");
+                txt_thmsg_file.Text = config_game.GetValue(now_game, "path_thmsg_up", "");
+                txt_thstd_archive.Text = config_game.GetValue(now_game, "path_thstd_p", "");
+                txt_thstd_file.Text = config_game.GetValue(now_game, "path_thstd_up", "");
+                
             }
             catch (Exception ex)
             {
